@@ -1,0 +1,61 @@
+{
+	"name": "mrp_master_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "mrp_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mrp_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "mrp_sil",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "mrp_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mrp_sil",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-23T06:50:03Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

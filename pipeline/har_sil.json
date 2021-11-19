@@ -1,0 +1,61 @@
+{
+	"name": "har_sil",
+	"properties": {
+		"activities": [
+			{
+				"name": "har_sil_dim",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "har_sil_dim",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "har_sil_fac",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "har_sil_dim",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "har_sil_fac",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-31T04:00:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

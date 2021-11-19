@@ -1,0 +1,165 @@
+{
+	"name": "test_cf_lending_rate",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"additionalColumns": [
+							{
+								"name": "w_file_name",
+								"value": "$$FILEPATH"
+							},
+							{
+								"name": "w_batch_id",
+								"value": {
+									"value": "@pipeline().parameters.BATCH_ID",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "w_insert_date",
+								"value": {
+									"value": "@addhours(utcnow(),7)",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "*",
+							"wildcardFileName": {
+								"value": "LaiSuatVay_pv_CF_Monthly_Forecast_2021.json",
+								"type": "Expression"
+							},
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"preCopyScript": {
+							"value": "IF OBJECT_ID('STG.W_EXE_CF_MONTHLY_LENDING_RATE_FORECAST_DS') IS NOT NULL\n\tTRUNCATE TABLE STG.W_EXE_CF_MONTHLY_LENDING_RATE_FORECAST_DS",
+							"type": "Expression"
+						},
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['0']"
+								},
+								"sink": {
+									"name": "RATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['1']"
+								},
+								"sink": {
+									"name": "BANK_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['2']"
+								},
+								"sink": {
+									"name": "CURRENCY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['3']"
+								},
+								"sink": {
+									"name": "VALUE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['w_file_name']"
+								},
+								"sink": {
+									"name": "w_file_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['w_batch_id']"
+								},
+								"sink": {
+									"name": "w_batch_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['w_insert_date']"
+								},
+								"sink": {
+									"name": "w_insert_date",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": ""
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "JSON_MDK",
+						"type": "DatasetReference",
+						"parameters": {
+							"location": "''",
+							"file": "''"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "STG",
+							"name": "W_EXE_CF_MONTHLY_LENDING_RATE_FORECAST_DS"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-09-14T04:04:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

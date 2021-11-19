@@ -1,0 +1,45 @@
+{
+	"name": "pipeline3",
+	"properties": {
+		"activities": [
+			{
+				"name": "get batch id",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderStoredProcedureName": "[ADF].[proc_etl_get_batch_id]",
+						"storedProcedureParameters": {
+							"p_batch_id": {
+								"type": "String",
+								"value": null
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-08-23T08:00:16Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

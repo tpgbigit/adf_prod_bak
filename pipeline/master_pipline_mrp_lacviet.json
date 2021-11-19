@@ -1,0 +1,163 @@
+{
+	"name": "master_pipline_mrp_lacviet",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set Batch Id",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "get batch id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "BATCH_ID",
+					"value": {
+						"value": "@{string(activity('get batch id').output.firstRow.BATCH_ID)}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "resume synapse",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "resume synapse",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "pause synapse",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "send_email",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pause synapse",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "get batch id",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "resume synapse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderStoredProcedureName": "[ADF].[proc_etl_get_batch_id]",
+						"storedProcedureParameters": {
+							"p_batch_id": {
+								"type": "String",
+								"value": null
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					}
+				}
+			},
+			{
+				"name": "mrp_pipline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Batch Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mrp_pipline",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@variables('BATCH_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "send_email",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "mrp_pipline",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "send_email",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@variables('BATCH_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"BATCH_ID": {
+				"type": "String",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-10-15T09:55:05Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

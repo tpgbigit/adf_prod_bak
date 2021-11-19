@@ -1,0 +1,110 @@
+{
+	"name": "sil_group",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderQuery": {
+							"value": "SELECT DISTINCT [ORDER] FROM [ADF].[ETL_JOB] WHERE JOB_SUB_GROUP = '@{pipeline().parameters.JOB_SUB_GROUP}'\nAND CASE WHEN '@{pipeline().parameters.JOB_ID}'= 'ALL' THEN JOB_ID ELSE CAST('@{pipeline().parameters.JOB_ID}' AS BIGINT) END = JOB_ID ",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "sil",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "sil",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"BATCH_ID": {
+										"value": "@pipeline().parameters.BATCH_ID",
+										"type": "Expression"
+									},
+									"JOB_ID": {
+										"value": "@pipeline().parameters.JOB_ID",
+										"type": "Expression"
+									},
+									"JOB_SUB_GROUP": {
+										"value": "@pipeline().parameters.JOB_SUB_GROUP",
+										"type": "Expression"
+									},
+									"ORDER": {
+										"value": "@item().ORDER",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"JOB_ID": {
+				"type": "string",
+				"defaultValue": "ALL"
+			},
+			"JOB_SUB_GROUP": {
+				"type": "string",
+				"defaultValue": "SIL MRP DIM"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-09T02:54:18Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,19 @@
+{
+	"name": "delete_all_blob_haravan",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "tpgstorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "haravan"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

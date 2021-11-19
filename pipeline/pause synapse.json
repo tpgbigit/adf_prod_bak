@@ -1,0 +1,116 @@
+{
+	"name": "pause synapse",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Azure Synapse State",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.subscriptions,'/resourceGroups/',pipeline().parameters.resourceGroups,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.servers,'/sqlPools/',pipeline().parameters.databases,'?api-version=2019-06-01-preview')\n",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.core.windows.net/"
+					}
+				}
+			},
+			{
+				"name": "Wait 5 seconds",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "Get Azure Synapse State",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 5
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Wait 5 seconds",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('Get Azure Synapse State').output.properties.status,'Online')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Pause Azure Synapse",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.subscriptions,'/resourceGroups/',pipeline().parameters.resourceGroups,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.servers,'/sqlPools/',pipeline().parameters.databases,'/pause?api-version=2019-06-01-preview')\n",
+									"type": "Expression"
+								},
+								"method": "POST",
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://management.core.windows.net/"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"subscriptions": {
+				"type": "string",
+				"defaultValue": "19306717-ce31-413d-819e-ed3e2963cf71"
+			},
+			"resourceGroups": {
+				"type": "string",
+				"defaultValue": "RGBI-PROD"
+			},
+			"servers": {
+				"type": "string",
+				"defaultValue": "tpgsynapsewsprod"
+			},
+			"databases": {
+				"type": "string",
+				"defaultValue": "dwhprod"
+			}
+		},
+		"folder": {
+			"name": "Synapse"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-18T10:26:47Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

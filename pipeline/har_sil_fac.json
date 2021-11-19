@@ -1,0 +1,44 @@
+{
+	"name": "har_sil_fac",
+	"properties": {
+		"activities": [
+			{
+				"name": "sil_group",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "sil_group",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						},
+						"JOB_ID": {
+							"value": "@pipeline().parameters.JOB_ID",
+							"type": "Expression"
+						},
+						"JOB_SUB_GROUP": "SIL HAR FAC"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"JOB_ID": {
+				"type": "string",
+				"defaultValue": "ALL"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-09T03:03:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

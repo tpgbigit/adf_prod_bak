@@ -1,0 +1,40 @@
+{
+	"name": "send_email",
+	"properties": {
+		"activities": [
+			{
+				"name": "Azure Function1",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "SendEmailFail",
+					"method": "POST",
+					"body": {
+						"value": "{\"mail_to_list\":\"['ty.le@justanalytics.com','Chuong.hh@tpgroup.com.vn','quoc.tp@tpgroup.com.vn','long.ln@365.tpgroup.com.vn','trongnhan@365.mdk.com.vn']\",\n\"batch_id\":\"@{pipeline().parameters.BATCH_ID}\"\n}\n\n\n",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "tpgfunction",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-10-15T04:37:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

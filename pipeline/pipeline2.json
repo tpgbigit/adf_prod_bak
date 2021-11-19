@@ -1,0 +1,30 @@
+{
+	"name": "pipeline2",
+	"properties": {
+		"activities": [
+			{
+				"name": "function_haravan",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "function_haravan",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"to_date": {
+							"value": "@adddays(addhours(utcnow(),7),-9)",
+							"type": "Expression"
+						},
+						"back": -7
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-08-18T02:48:31Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

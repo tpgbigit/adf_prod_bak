@@ -1,0 +1,57 @@
+{
+	"name": "refresh dataset",
+	"properties": {
+		"activities": [
+			{
+				"name": "Refresh dataset",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "https://api.powerbi.com/v1.0/myorg/groups/@{pipeline().parameters.groupId}/datasets/@{pipeline().parameters.datasetId}/refreshes",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Authorization": {
+							"value": "@pipeline().parameters.Token",
+							"type": "Expression"
+						},
+						"Content-Type": {
+							"value": "@pipeline().parameters.Content_type",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Token": {
+				"type": "string"
+			},
+			"Content_type": {
+				"type": "string"
+			},
+			"datasetId": {
+				"type": "string"
+			},
+			"groupId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Refresh PBI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-23T07:54:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

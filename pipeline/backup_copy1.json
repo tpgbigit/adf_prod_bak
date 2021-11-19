@@ -1,0 +1,64 @@
+{
+	"name": "backup_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "copy",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "Container",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "mrp"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "backup",
+							"folder": {
+								"value": "mrp/@{formatDateTime(addhours(utcnow(),7),'yyyyMM')}/@{formatDateTime(addhours(utcnow(),7),'yyyyMMdd')}",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-08-22T10:03:42Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

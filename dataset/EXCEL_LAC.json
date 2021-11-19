@@ -1,0 +1,21 @@
+{
+	"name": "EXCEL_LAC",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "tpgstorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Sheet1",
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "lacviet"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,9 @@
+{
+	"name": "tpgbiadfprod",
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "6ad75358-65c6-462a-806e-55922fc00b46",
+		"tenantId": "423d658d-def9-41ee-ace9-b9065225e374"
+	}
+}

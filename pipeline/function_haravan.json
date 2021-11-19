@@ -1,0 +1,128 @@
+{
+	"name": "function_haravan",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Delete1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderQuery": "select distinct lower([API_GROUP]) name from [ADF].[ETL_JOB] where job_sub_group ='har'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "function_haravan",
+							"type": "AzureFunctionActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"functionName": "haravan",
+								"method": "POST",
+								"body": {
+									"value": "{\"from_date\":\"@{formatDateTime(adddays(if(or(equals(pipeline().parameters.to_date,null),equals(pipeline().parameters.to_date,'')),addhours(utcnow(),7),pipeline().parameters.to_date),int(pipeline().parameters.back)),'yyyy-MM-dd')}\",\"to_date\":\"@{formatDateTime(if(or(equals(pipeline().parameters.to_date,null),equals(pipeline().parameters.to_date,'')),addhours(utcnow(),7),pipeline().parameters.to_date),'yyyy-MM-dd')}\",\"api\":\"['@{item().name}']\"}",
+									"type": "Expression"
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "tpgfunction",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Delete1",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "delete_all_blob_haravan",
+						"type": "DatasetReference"
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"parameters": {
+			"to_date": {
+				"type": "string"
+			},
+			"back": {
+				"type": "int",
+				"defaultValue": -7
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-18T02:02:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

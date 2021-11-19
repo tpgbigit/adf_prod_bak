@@ -1,0 +1,219 @@
+{
+	"name": "delete_backup",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delete1",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "copy",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "backup",
+							"folder": {
+								"value": "@pipeline().parameters.folder_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "copy",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Delete_tmp",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "backup",
+							"folder": {
+								"value": "@{pipeline().parameters.folder_name}/@{formatDateTime(addhours(utcnow(),7),'yyyyMM')}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "backup",
+							"folder": {
+								"value": "@pipeline().parameters.tmp_name",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete_tmp",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "backup",
+							"folder": {
+								"value": "@pipeline().parameters.tmp_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "copy2",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Delete1",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "backup",
+							"folder": {
+								"value": "@pipeline().parameters.tmp_name",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "backup",
+							"folder": {
+								"value": "@{pipeline().parameters.folder_name}/@{formatDateTime(addhours(utcnow(),7),'yyyyMM')}",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"tmp_name": {
+				"type": "string"
+			},
+			"folder_name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-11-17T03:09:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

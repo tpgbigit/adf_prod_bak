@@ -1,0 +1,35 @@
+{
+	"name": "delete",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delete1",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "delete_all_blob_haravan",
+						"type": "DatasetReference"
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-08-11T07:02:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

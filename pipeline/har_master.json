@@ -1,0 +1,264 @@
+{
+	"name": "har_master",
+	"properties": {
+		"activities": [
+			{
+				"name": "har_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "function_haravan",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "har_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@variables('BATCH_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "har_sil",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "har_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "mdk_excel_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "har_sil",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@variables('BATCH_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "function_haravan",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Batch Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "function_haravan",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"back": -7
+					}
+				}
+			},
+			{
+				"name": "Set Batch Id",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "get batch id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "BATCH_ID",
+					"value": {
+						"value": "@{string(activity('get batch id').output.firstRow.BATCH_ID)}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "mdk_excel_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "function_load_sharepoint",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mdk_excel_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@variables('BATCH_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "function_load_sharepoint",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Batch Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "function_load_sharepoint",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "resume synapse",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "resume synapse",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "refresh PBI",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "har_sil",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "refresh PBI",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Content_type": "application/json",
+						"groupId": "b5ca5d66-3e23-497c-8197-fa6f595abde7",
+						"datasetid": "bb3cf5c3-4b49-4d70-898d-05da54dcdea6",
+						"dataset_name": "MDK"
+					}
+				}
+			},
+			{
+				"name": "pause synapse",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "refresh PBI",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pause synapse",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "get batch id",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "resume synapse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderStoredProcedureName": "[ADF].[proc_etl_get_batch_id]",
+						"storedProcedureParameters": {
+							"p_batch_id": {
+								"type": "String",
+								"value": null
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"BATCH_ID": {
+				"type": "String",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-24T00:46:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

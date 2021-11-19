@@ -1,0 +1,33 @@
+{
+	"name": "Trigget 6AM",
+	"properties": {
+		"description": "Run at 6h",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "master_pipline_har",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-10-15T06:00:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						6
+					]
+				}
+			}
+		}
+	}
+}

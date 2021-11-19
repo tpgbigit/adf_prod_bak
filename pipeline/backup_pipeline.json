@@ -1,0 +1,73 @@
+{
+	"name": "backup_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "delete_backup",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "delete_backup",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tmp_name": {
+							"value": "@pipeline().parameters.tmp_name",
+							"type": "Expression"
+						},
+						"folder_name": {
+							"value": "@pipeline().parameters.folder_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "backup",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "delete_backup",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "backup",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tmp_name": {
+							"value": "@pipeline().parameters.tmp_name",
+							"type": "Expression"
+						},
+						"folder_name": {
+							"value": "@pipeline().parameters.folder_name",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"tmp_name": {
+				"type": "string",
+				"defaultValue": "tmp"
+			},
+			"folder_name": {
+				"type": "string",
+				"defaultValue": "mrp"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-11-17T03:09:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

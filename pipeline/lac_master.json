@@ -1,0 +1,85 @@
+{
+	"name": "lac_master",
+	"properties": {
+		"activities": [
+			{
+				"name": "lac_sil",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "lac_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "lac_sil",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "lac_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "lac_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "backup_pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "lac_sde",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "backup_pipeline",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tmp_name": "tmp_lac",
+						"folder_name": "lacviet"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-11-17T03:24:01Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

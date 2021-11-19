@@ -1,0 +1,32 @@
+{
+	"name": "Trigget 2AM",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "master_pipline_mrp_lacviet",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-08-18T10:28:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						2
+					]
+				}
+			}
+		}
+	}
+}

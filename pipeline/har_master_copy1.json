@@ -1,0 +1,61 @@
+{
+	"name": "har_master_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "har_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "har_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "har_sil",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "har_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "har_sil",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-09T03:03:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

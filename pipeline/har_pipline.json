@@ -1,0 +1,155 @@
+{
+	"name": "har_pipline",
+	"properties": {
+		"activities": [
+			{
+				"name": "har_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "function_haravan",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "har_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "har_sil",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "har_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "mdk_excel_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "har_sil",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "function_haravan",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "function_haravan",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"back": -7
+					}
+				}
+			},
+			{
+				"name": "mdk_excel_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "function_load_sharepoint",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mdk_excel_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "function_load_sharepoint",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "function_load_sharepoint",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "refresh PBI",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "har_sil",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "refresh PBI",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Content_type": "application/json",
+						"groupId": "5f928561-e59a-4f73-971a-98cf951cd01c",
+						"datasetid": "2e005ad0-b25b-4fdc-ad3f-3de780ff6072",
+						"dataset_name": "MDK"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-10-01T09:42:50Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

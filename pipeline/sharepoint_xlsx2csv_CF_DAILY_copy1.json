@@ -1,0 +1,35 @@
+{
+	"name": "sharepoint_xlsx2csv_CF_DAILY_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "function_load_sharepoint",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "sharepoint_xlsxpv2json",
+					"method": "POST",
+					"body": {
+						"value": "{\n\"folder\":\"CF\"\n,\"file_name\":\"CF_Monthly_Forecast_\"\n,\"sheet_name\":\"NPL_ThanhToan\"\n,\"header_name\":\"[]\"\n,\"header_range\":\"[0,1,2]\"\n,\"column_range\":\"[0:1]\"\n}",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "tpgfunction",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-08-12T06:44:52Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

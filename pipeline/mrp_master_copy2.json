@@ -1,0 +1,141 @@
+{
+	"name": "mrp_master_copy2",
+	"properties": {
+		"activities": [
+			{
+				"name": "mrp_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Batch Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mrp_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@variables('BATCH_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "mrp_sil",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "mrp_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mrp_sil",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@variables('BATCH_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "backup_pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "mrp_sde",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "backup_pipeline",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tmp_name": "tmp",
+						"folder_name": "mrp"
+					}
+				}
+			},
+			{
+				"name": "Set Batch Id",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "BATCH_ID",
+					"value": {
+						"value": "@{formatDateTime(addhours(utcnow(),7),'yyyyMMdd')}01",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "refresh PBI",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "mrp_sil",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "backup_pipeline",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "refresh PBI",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"groupId": "4882db3f-fc7b-4217-8b08-b865206fecd7",
+						"datasetid": "2faa6669-1fea-4e78-848c-06fc5f3a3392",
+						"dataset_name": "FOB"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"variables": {
+			"BATCH_ID": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-11-17T03:09:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

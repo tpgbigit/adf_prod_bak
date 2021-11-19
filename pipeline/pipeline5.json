@@ -1,0 +1,65 @@
+{
+	"name": "pipeline5",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderQuery": "select * from [DWH].[W_MRP_TRX_SALES_INVOICE_F]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"preCopyScript": "truncate table [DWH].[W_MRP_TRX_SALES_INVOICE_F]",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "tpgsynapsepool_copy1",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "DWH",
+							"name": "W_MRP_TRX_SALES_INVOICE_F"
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-10-17T12:56:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

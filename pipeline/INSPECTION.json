@@ -1,0 +1,148 @@
+{
+	"name": "INSPECTION",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "resume synapse",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"additionalColumns": [
+							{
+								"name": "W_INSERT_DT",
+								"value": {
+									"value": "@addhours(utcnow(),7)",
+									"type": "Expression"
+								}
+							}
+						],
+						"sqlReaderQuery": {
+							"value": "select  '@{pipeline().parameters.flag}' INSPECTION_FLAG",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"preCopyScript": "TRUNCATE TABLE DWH.W_MRP_MD_INSPECTION_D",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "DWH",
+							"name": "W_MRP_MD_INSPECTION_D"
+						}
+					}
+				]
+			},
+			{
+				"name": "refresh PBI",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "refresh PBI",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Content_type": "application/json",
+						"groupId": "b5ca5d66-3e23-497c-8197-fa6f595abde7",
+						"datasetid": "bb3cf5c3-4b49-4d70-898d-05da54dcdea6",
+						"dataset_name": "MDK"
+					}
+				}
+			},
+			{
+				"name": "pause synapse",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "refresh PBI",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pause synapse",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "resume synapse",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "resume synapse",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"parameters": {
+			"flag": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-09-15T13:07:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

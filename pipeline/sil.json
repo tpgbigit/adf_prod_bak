@@ -1,0 +1,145 @@
+{
+	"name": "sil",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderStoredProcedureName": "[ADF].[proc_etl_get_job]",
+						"storedProcedureParameters": {
+							"p_api_group": {
+								"type": "String",
+								"value": null
+							},
+							"p_batch_id": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.BATCH_ID",
+									"type": "Expression"
+								}
+							},
+							"p_job_id": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.JOB_ID",
+									"type": "Expression"
+								}
+							},
+							"p_job_sub_group": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.JOB_SUB_GROUP",
+									"type": "Expression"
+								}
+							},
+							"p_order": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.ORDER",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "tpgsynapsepool",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Stored procedure1",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "@item().JOB_SCRIPT",
+									"type": "Expression"
+								},
+								"storedProcedureParameters": {
+									"p_batch_id": {
+										"value": {
+											"value": "@pipeline().parameters.BATCH_ID",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "tpgsynapsepool",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"JOB_ID": {
+				"type": "string",
+				"defaultValue": "ALL"
+			},
+			"JOB_SUB_GROUP": {
+				"type": "string",
+				"defaultValue": "SIL MRP DIM"
+			},
+			"ORDER": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-09T02:53:30Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

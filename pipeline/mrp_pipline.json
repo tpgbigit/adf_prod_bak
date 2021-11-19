@@ -1,0 +1,110 @@
+{
+	"name": "mrp_pipline",
+	"properties": {
+		"activities": [
+			{
+				"name": "mrp_sde",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mrp_sde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "mrp_sil",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "mrp_sde",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "mrp_sil",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BATCH_ID": {
+							"value": "@pipeline().parameters.BATCH_ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "backup_pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "mrp_sde",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "backup_pipeline",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tmp_name": "tmp",
+						"folder_name": "mrp"
+					}
+				}
+			},
+			{
+				"name": "refresh PBI",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "mrp_sil",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "refresh PBI",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"groupId": "7c6ecd47-5b73-413c-afdd-79b8c7f8a946",
+						"datasetid": "e8e68d8f-0766-4d2f-b832-779f8406397b",
+						"dataset_name": "FOB"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BATCH_ID": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-11-17T03:09:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

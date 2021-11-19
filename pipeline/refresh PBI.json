@@ -1,0 +1,152 @@
+{
+	"name": "refresh PBI",
+	"properties": {
+		"activities": [
+			{
+				"name": "Grant vaiable",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get pbI token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Token",
+					"value": {
+						"value": "Bearer @{activity('Get pbi token').output.access_token}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "check status refresh MDK",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "refresh MDK",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "check status refresh",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"datasetid": {
+							"value": "@pipeline().parameters.datasetid",
+							"type": "Expression"
+						},
+						"group_id": {
+							"value": "@pipeline().parameters.groupId",
+							"type": "Expression"
+						},
+						"dataset_name": {
+							"value": "@pipeline().parameters.dataset_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "refresh MDK",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Grant vaiable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "refresh dataset",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Token": {
+							"value": "@variables('Token')",
+							"type": "Expression"
+						},
+						"Content_type": {
+							"value": "@pipeline().parameters.Content_type",
+							"type": "Expression"
+						},
+						"datasetId": {
+							"value": "@pipeline().parameters.datasetid",
+							"type": "Expression"
+						},
+						"groupId": {
+							"value": "@pipeline().parameters.groupId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get pbI token",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "https://login.microsoftonline.com/423d658d-def9-41ee-ace9-b9065225e374/oauth2/token",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					"body": {
+						"value": "grant_type=password&username=jabi@tpgroupvn.onmicrosoft.com&password=Bah45836&client_id=d4b97518-dd89-4433-89d3-7c94250b167a&resource=https://analysis.windows.net/powerbi/api&client_secret=0.WE95Cdr2e4bMv1UST-V~x04_R9EwKe~6",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Content_type": {
+				"type": "string",
+				"defaultValue": "application/json"
+			},
+			"groupId": {
+				"type": "string"
+			},
+			"datasetid": {
+				"type": "string"
+			},
+			"dataset_name": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"Token": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Refresh PBI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-10-20T10:26:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
